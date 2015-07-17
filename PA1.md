@@ -1,0 +1,46 @@
+# Reproducible Research: Peer Assessment 1
+
+
+
+## Loading and preprocessing the data
+
+
+The variables included in this dataset are:  
+
+- steps: Number of steps taking in a 5-minute interval (missing values are coded as NA)
+- date: The date on which the measurement was taken in YYYY-MM-DD format
+- interval: Identifier for the 5-minute interval in which measurement was taken
+
+
+The data is loaded from activity.csv and stored in activity.
+
+
+```r
+activity <- read.csv("activity.csv") 
+```
+
+## What is mean total number of steps taken per day?
+
+The code below is used to add up the steps taken on each day in the data, where a reading is recorded (not NA).     
+**Note**: where no measurements are available, the day is excluded from the calculation of the mean.   
+
+
+```r
+library(plyr)
+# Sum steps for each day where the value is recorded for the interval
+days.Steps <- ddply(subset(activity, !(is.na(steps)) ), "date", colwise(sum))
+# Calculate the mean steps over the days in the data
+mean.Steps<-apply(days.Steps[2], 2, mean)
+```
+
+Using the above code the **mean total number of steps taken per day** (mean.Steps) is calculated to be **10766.1886792**.   
+
+## What is the average daily activity pattern?
+
+
+
+## Imputing missing values
+
+
+
+## Are there differences in activity patterns between weekdays and weekends?
