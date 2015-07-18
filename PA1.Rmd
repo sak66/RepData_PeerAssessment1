@@ -19,7 +19,7 @@ The variables included in this dataset are:
 - interval: Identifier for the 5-minute interval in which measurement was taken
 
 
-The data is loaded from activity.csv and stored in activity.
+The data is loaded from activity.csv and stored in activity. 
 
 ```{r loaddata,echo=TRUE}
 activity <- read.csv("activity.csv") 
@@ -27,18 +27,48 @@ activity <- read.csv("activity.csv")
 
 ## What is mean total number of steps taken per day?
 
-The code below is used to add up the steps taken on each day in the data, where a reading is recorded (not NA).     
-**Note**: where no measurements are available, the day is excluded from the calculation of the mean.   
 
-```{r meanstepsperday,echo=TRUE}
+###1. The total number of steps taken per day###
+
+The total number of steps taken each day is calculated using the code below. The steps taken on each day in the data, where a valid reading is recorded (not NA) are summed and recorded in days.Steps. 
+
+```{r daysteps,echo=TRUE}
 library(plyr)
 # Sum steps for each day where the value is recorded for the interval
 days.Steps <- ddply(subset(activity, !(is.na(steps)) ), "date", colwise(sum))
-# Calculate the mean steps over the days in the data
-mean.Steps<-apply(days.Steps[2], 2, mean)
 ```
 
-Using the above code the **mean total number of steps taken per day** (mean.Steps) is calculated to be **`r mean.Steps`**.   
+The following cade prints the table containing the calculated steps taken on each day (contents of days.Steps). The output shows the date and the total steps taken on that date.   
+
+```{r displayframe,echo=TRUE,results = 'asis',warning=FALSE}
+library(knitr)
+kable(days.Steps[,1:2], align="c")
+```
+   
+###2. The data in days.Steps is used to create a histogram of the total number of steps taken each day ###   
+
+The code below breaks the range of steps in to 5 and plots a histogram of the frequency of each of the 5 range steps in terms of days.
+
+```{r plotstepshist, echo=TRUE}
+hist(days.Steps$steps, breaks=5, main="Steps Taken Each Day", xlab = "Steps taken", ylab="Number of days (frequency)")
+```
+
+
+###3. The mean and median of the total number of step taken per day (in days.Steps) are then calcuated###
+
+The code below calculates the mean and median steps per day.   
+**Note**: where no measurements were available in the activity data for an entire day, the day is excluded from the calculation of the mean.   
+
+```{r meanstepsperday,echo=TRUE}
+mean.Steps<-apply(days.Steps[2], 2, mean)
+median.Steps<-apply(days.Steps[2], 2, median)
+```
+
+
+Using the calculated mean and median values above: 
+
+- The **mean** total number of steps taken per day (mean.Steps) is calculated to be **`r mean.Steps`**.   
+- The **median** total number of steps taken per day (median.Steps) is calculated to be **`r median.Steps`**.   
 
 ## What is the average daily activity pattern?
 
