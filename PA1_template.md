@@ -19,10 +19,10 @@ The data is loaded from activity.csv and stored in activity.
 activity <- read.csv("activity.csv") 
 ```
 
-## What is mean total number of steps taken per day?
+## What is mean total number of steps taken per day?   
 
 
-###1. The total number of steps taken per day###
+###1. The total number of steps taken per day   
 
 The total number of steps taken each day is calculated using the code below. The steps taken on each day in the data, where a valid reading is recorded (not NA) are summed and recorded in days.Steps. 
 
