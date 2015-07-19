@@ -82,7 +82,7 @@ img {
 <p>The total number of steps taken each day is calculated using the code below. The steps taken on each day in the data, where a valid reading is recorded (not NA) are summed and recorded in days.Steps.</p>
 <pre class="r"><code>library(plyr)
 # Sum steps for each day where the value is recorded for the interval
-days.Steps &lt;- ddply(subset(activity, !(is.na(steps)) ), &quot;date&quot;, colwise(sum))</code></pre>
+days.Steps &lt;- ddply(subset(activity[c(&quot;date&quot;,&quot;steps&quot;)], !(is.na(steps)) ), &quot;date&quot;, colwise(sum))</code></pre>
 <p>The following cade prints the table containing the calculated steps taken on each day (contents of days.Steps). The output shows the date and the total steps taken on that date.</p>
 <pre class="r"><code>library(knitr)
 kable(days.Steps[,1:2], align=&quot;c&quot;)</code></pre>
@@ -317,7 +317,7 @@ kable(days.Steps[,1:2], align=&quot;c&quot;)</code></pre>
 </div>
 <div id="the-mean-and-median-of-the-total-number-of-step-taken-per-day-in-days.steps-are-then-calcuated" class="section level3">
 <h3>3. The mean and median of the total number of step taken per day (in days.Steps) are then calcuated</h3>
-<p>The code below calculates the mean and median steps per day.<br /><strong>Note</strong>: where no measurements were available in the activity data for an entire day, the day is excluded from the calculation of the mean.</p>
+<p>The code below calculates the mean and median steps per day.<br /><strong>Note</strong>: where no measurements were available in the activity data for an entire day, the day is excluded from the calculation of the mean and median.</p>
 <pre class="r"><code>mean.Steps&lt;-apply(days.Steps[2], 2, mean)
 median.Steps&lt;-apply(days.Steps[2], 2, median)</code></pre>
 <p>Using the calculated mean and median values above:</p>
@@ -329,6 +329,26 @@ median.Steps&lt;-apply(days.Steps[2], 2, median)</code></pre>
 </div>
 <div id="what-is-the-average-daily-activity-pattern" class="section level2">
 <h2>What is the average daily activity pattern?</h2>
+<div id="make-a-time-series-plot-i.e.type-l-of-the-5-minute-interval-x-axis-and-the-average-number-of-steps-taken-averaged-across-all-days-y-axis" class="section level3">
+<h3>1. Make a time series plot (i.e. type = “l”) of the 5-minute interval (x-axis) and the average number of steps taken, averaged across all days (y-axis)</h3>
+</div>
+<div id="which-5-minute-interval-on-average-across-all-the-days-in-the-dataset-contains-the-maximum-number-of-steps" class="section level3">
+<h3>2. Which 5-minute interval, on average across all the days in the dataset, contains the maximum number of steps?</h3>
+<p>To answer this question, first the maximum steps on each day are calculated from the activity data.</p>
+<pre class="r"><code>days.Max &lt;- ddply(subset(activity, !(is.na(steps)) ), &quot;date&quot;, colwise(max,&quot;steps&quot;))</code></pre>
+<p>Using the days.Max derived above, the following code selects the the rows from the activity data where the steps are equal to the maximam reading of steps on that day. This gives all the rows, (date, steps, interval) that contain the maximum steps in an interval on a given day. <em>Note</em>: there may be multiple intervals on the same day that have the same maximum steps.</p>
+<pre class="r"><code>intervals.Max &lt;- data.frame()
+for ( i in  1:nrow(days.Max)) {
+    index.day&lt;-toString(days.Max[i,1])
+    index.steps&lt;-days.Max[i,2]
+    current.row &lt;- subset(activity, date == index.day &amp; steps == index.steps)
+    intervals.Max &lt;- rbind(intervals.Max,current.row)
+}</code></pre>
+<p>Given the intervals.Max we can work out a median interval in this set, which will be the 5-minute interval, on average across all the days in the dataset, that contains the maximum number of steps.</p>
+<p>The following code works out the median of intervals:</p>
+<pre class="r"><code>median.ActiveInterval&lt;-median(as.vector(intervals.Max[,3]))</code></pre>
+<p>The 5-minute interval, on average across all the days in the dataset, that contains the maximum number of steps is the <strong>median</strong> of most active intervals (median.ActiveInterval) and is calculated to be <strong>1025</strong>.</p>
+</div>
 </div>
 <div id="imputing-missing-values" class="section level2">
 <h2>Imputing missing values</h2>

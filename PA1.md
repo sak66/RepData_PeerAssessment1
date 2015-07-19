@@ -30,7 +30,7 @@ The total number of steps taken each day is calculated using the code below. The
 ```r
 library(plyr)
 # Sum steps for each day where the value is recorded for the interval
-days.Steps <- ddply(subset(activity, !(is.na(steps)) ), "date", colwise(sum))
+days.Steps <- ddply(subset(activity[c("date","steps")], !(is.na(steps)) ), "date", colwise(sum))
 ```
 
 The following cade prints the table containing the calculated steps taken on each day (contents of days.Steps). The output shows the date and the total steps taken on that date.   
@@ -112,7 +112,7 @@ hist(days.Steps$steps, breaks=5, main="Steps Taken Each Day", xlab = "Steps take
 ###3. The mean and median of the total number of step taken per day (in days.Steps) are then calcuated###
 
 The code below calculates the mean and median steps per day.   
-**Note**: where no measurements were available in the activity data for an entire day, the day is excluded from the calculation of the mean.   
+**Note**: where no measurements were available in the activity data for an entire day, the day is excluded from the calculation of the mean and median.   
 
 
 ```r
@@ -128,7 +128,40 @@ Using the calculated mean and median values above:
 
 ## What is the average daily activity pattern?
 
+###1. Make a time series plot (i.e. type = "l") of the 5-minute interval (x-axis) and the average number of steps taken, averaged across all days (y-axis)
 
+###2. Which 5-minute interval, on average across all the days in the dataset, contains the maximum number of steps?
+
+To answer this question, first the maximum steps on each day are calculated from the activity data.
+
+
+```r
+days.Max <- ddply(subset(activity, !(is.na(steps)) ), "date", colwise(max,"steps"))
+```
+
+Using the days.Max derived above, the following code selects the the rows from the activity data where the steps are equal to the maximam reading of steps on that day. This gives all the rows, (date, steps, interval) that contain the maximum steps in an interval on a given day. *Note*: there may be multiple intervals on the same day that have the same maximum steps.   
+
+
+```r
+intervals.Max <- data.frame()
+for ( i in  1:nrow(days.Max)) {
+    index.day<-toString(days.Max[i,1])
+    index.steps<-days.Max[i,2]
+    current.row <- subset(activity, date == index.day & steps == index.steps)
+    intervals.Max <- rbind(intervals.Max,current.row)
+}
+```
+
+Given the intervals.Max we can work out a median interval in this set, which will be the 5-minute interval, on average across all the days in the dataset, that contains the maximum number of steps.   
+
+The following code works out the median of intervals:  
+
+
+```r
+median.ActiveInterval<-median(as.vector(intervals.Max[,3]))
+```
+
+The 5-minute interval, on average across all the days in the dataset, that contains the maximum number of steps is the **median** of most active intervals (median.ActiveInterval) and is calculated to be  **1025**.   
 
 ## Imputing missing values
 
