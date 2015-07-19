@@ -97,7 +97,7 @@ kable(days.Steps[,1:2], align="c")
  2012-11-28    10183 
  2012-11-29    7047  
    
-###2. The data in days.Steps is used to create a histogram of the total number of steps taken each day ###   
+###2. The data in days.Steps is used to create a histogram of the total number of steps taken each day   
 
 The code below breaks the range of steps in to 5 and plots a histogram of the frequency of each of the 5 range steps in terms of days.
 
@@ -109,7 +109,7 @@ hist(days.Steps$steps, breaks=5, main="Steps Taken Each Day", xlab = "Steps take
 ![](PA1_template_files/figure-html/plotstepshist-1.png) 
 
 
-###3. The mean and median of the total number of step taken per day (in days.Steps) are then calcuated###
+###3. The mean and median of the total number of step taken per day (in days.Steps) are then calcuated   
 
 The code below calculates the mean and median steps per day.   
 **Note**: where no measurements were available in the activity data for an entire day, the day is excluded from the calculation of the mean and median.   
@@ -178,7 +178,7 @@ The 5-minute interval, on average across all the days in the dataset, that conta
 
 ## Imputing missing values
 
-###1. Calculate and report the total number of missing values in the dataset (i.e. the total number of rows with NAs)###
+###1. Calculate and report the total number of missing values in the dataset (i.e. the total number of rows with NAs)   
 
 The total number of rows with NA is calculated as follows:
 
@@ -192,14 +192,14 @@ The total number of missing values in the dataset is **2304**.
    
    
 
-##2. A strategy for filling in all of the missing values in the dataset.
+###2. A strategy for filling in all of the missing values in the dataset.
 
 **The strategy for filling the 2304 missing step readings implemented below is to replace each missing reading with 0.**   
 
 **NOTE:**  This simple stratagy was selected for expedience, however a better approach is to replace the missing values with avarage value accross all days of the interval for which the reading is missing.  
 
 
-##3. Create a new dataset that is equal to the original dataset but with the missing data filled in.
+###3. Create a new dataset that is equal to the original dataset but with the missing data filled in.
 
 The NAs are replace with 0.   
 
@@ -209,7 +209,7 @@ activity.new <- activity
 activity.new[is.na(activity.new)] <- 0
 ```
 
-##4, Make a histogram of the total number of steps taken each day and Calculate and report the mean and median total number of steps taken per day. Do these values differ from the estimates from the first part of the assignment? What is the impact of imputing missing data on the estimates of the total daily number of steps?
+###4, Make a histogram of the total number of steps taken each day and Calculate and report the mean and median total number of steps taken per day. Do these values differ from the estimates from the first part of the assignment? What is the impact of imputing missing data on the estimates of the total daily number of steps?
 
 
 
