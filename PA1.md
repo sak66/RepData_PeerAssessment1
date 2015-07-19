@@ -130,41 +130,153 @@ Using the calculated mean and median values above:
 
 ###1. Make a time series plot (i.e. type = "l") of the 5-minute interval (x-axis) and the average number of steps taken, averaged across all days (y-axis)
 
+
+To plot the avarage number of steps taken in each interval accross days, the activity data is processed to produce a vector that contins the total number of steps taken in each intervall accross all days (where a measrement is available).
+
+
+```r
+# Sum of steps for each interval accross all days.
+interval.total.Steps <- ddply(subset(activity[c("interval","steps")], !(is.na(steps)) ), "interval", colwise(sum))
+```
+
+Once the totals for each interval are calculated, a mean is gound for each intervall by deviding the total by the number of days. Noting that each intervals occurs only once a day. The number of days (where a measrement is available) is simply the number of rows in days.Steps (it has one row per day).   
+
+
+```r
+# copy the data for calculation of mean
+interval.mean.Steps  <- interval.total.Steps
+# calculate mean by altering the steps column (ie total steps in the interval/ days)
+sample.days <- nrow(days.Steps)
+interval.mean.Steps$steps <- interval.mean.Steps$steps / sample.days
+```
+
+The data in interval.mean.Steps is used to make a time series plot of the 5-minute interval (x-axis) and the average number of steps taken, averaged across all days (y-axis) below:
+
+
+```r
+library(ggplot2)
+p <- ggplot(interval.mean.Steps, aes(interval, steps)) + geom_line() +
+      xlab("Interval") + ylab("Mean Steps")
+print(p)
+```
+
+![](PA1_files/figure-html/tsplot-1.png) 
+
 ###2. Which 5-minute interval, on average across all the days in the dataset, contains the maximum number of steps?
 
-To answer this question, first the maximum steps on each day are calculated from the activity data.
+The following extracts the row from interval.mean.Steps (as created above) which has the highest value for steps, ie it has the highest mean of any interval avaraged accross all the days in the dataset.   
 
 
 ```r
-days.Max <- ddply(subset(activity, !(is.na(steps)) ), "date", colwise(max,"steps"))
+interval.maxmean <- interval.mean.Steps[ which(interval.mean.Steps$steps == max(interval.mean.Steps$steps)), ]
+interval.id <- interval.maxmean$interval
+interval.value <- interval.maxmean$steps
 ```
 
-Using the days.Max derived above, the following code selects the the rows from the activity data where the steps are equal to the maximam reading of steps on that day. This gives all the rows, (date, steps, interval) that contain the maximum steps in an interval on a given day. *Note*: there may be multiple intervals on the same day that have the same maximum steps.   
 
-
-```r
-intervals.Max <- data.frame()
-for ( i in  1:nrow(days.Max)) {
-    index.day<-toString(days.Max[i,1])
-    index.steps<-days.Max[i,2]
-    current.row <- subset(activity, date == index.day & steps == index.steps)
-    intervals.Max <- rbind(intervals.Max,current.row)
-}
-```
-
-Given the intervals.Max we can work out a median interval in this set, which will be the 5-minute interval, on average across all the days in the dataset, that contains the maximum number of steps.   
-
-The following code works out the median of intervals:  
-
-
-```r
-median.ActiveInterval<-median(as.vector(intervals.Max[,3]))
-```
-
-The 5-minute interval, on average across all the days in the dataset, that contains the maximum number of steps is the **median** of most active intervals (median.ActiveInterval) and is calculated to be  **1025**.   
+The 5-minute interval, on average across all the days in the dataset, that contains the maximum number of steps is the is calculated to be  **835**. (The mean number of steps in that interval is calculated to be **206.1698113**)   
 
 ## Imputing missing values
 
+###1. Calculate and report the total number of missing values in the dataset (i.e. the total number of rows with NAs)###
+
+The total number of rows with NA is calculated as follows:
+
+
+```r
+activity.with.noreading <- subset(activity, (is.na(steps)))
+missing.values.total <- nrow(activity.with.noreading)
+```
+
+The total number of missing values in the dataset is **2304**.   
+   
+   
+
+##2. A strategy for filling in all of the missing values in the dataset.
+
+**The strategy for filling the 2304 missing step readings implemented below is to replace each missing reading with 0.**   
+
+**NOTE:**  This simple stratagy was selected for expedience, however a better approach is to replace the missing values with avarage value accross all days of the interval for which the reading is missing.  
+
+
+##3. Create a new dataset that is equal to the original dataset but with the missing data filled in.
+
+The NAs are replace with 0.   
+
+
+```r
+activity.new <- activity
+activity.new[is.na(activity.new)] <- 0
+```
+
+##4, Make a histogram of the total number of steps taken each day and Calculate and report the mean and median total number of steps taken per day. Do these values differ from the estimates from the first part of the assignment? What is the impact of imputing missing data on the estimates of the total daily number of steps?
+
+
+
+```r
+days.Steps.new <- ddply(subset(activity.new[c("date","steps")], !(is.na(steps)) ), "date", colwise(sum))
+hist(days.Steps.new$steps, breaks=5, main="Steps Taken Each Day (extrapalations instead of missing readings)", xlab = "Steps taken", ylab="Number of days (frequency)")
+```
+
+![](PA1_files/figure-html/extrapalatedplot-1.png) 
+
+```r
+mean.Steps.new<-apply(days.Steps.new[2], 2, mean)
+median.Steps.new<-apply(days.Steps.new[2], 2, median)
+```
+
+
+Using the new calculated mean and median values above for the dataset with extrapolated values replacing missing readings: 
+
+- The **mean** total number of steps taken per day (mean.Steps) is calculated to be **9354.2295082**.  (previously **10766.1886792**) 
+- The **median** total number of steps taken per day (median.Steps) is calculated to be **10395**. (previously **10765**)
+
+The values do differ from the vlues from the first part of the assignment, The impact of inputing missing data (in this case making it 0) has reduced the estimates of the total daily number of steps. This effct depends on the selected strategy for dealing with missing readings.
 
 
 ## Are there differences in activity patterns between weekdays and weekends?
+
+###1. Create a new factor variable in the dataset with two levels – “weekday” and “weekend” indicating whether a given date is a weekday or weekend day ?
+
+The following code creates a new factor variable:   
+
+
+```r
+activity.new$date <- as.Date(activity.new$date)
+wd <- c('Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday')
+activity.new$weekDay <- factor((weekdays(activity.new$date) %in% wd), levels=c(FALSE, TRUE), labels=c('weekend', 'weekday'))
+```
+
+
+###2. Make a panel plot containing a time series plot (i.e. type = "l") of the 5-minute interval (x-axis) and the average number of steps taken, averaged across all weekday days or weekend days (y-axis). See the README file in the GitHub repository to see an example of what this plot should look like using simulated data.
+
+To plot the avarage number of steps taken in each interval accross days, the extrapalated activity data is processed to produce a vector that contins the total number of steps taken in each intervall accross all days.
+
+
+```r
+# Sum of steps for each interval accross all days.
+interval.total.Steps.new <- ddply(subset(activity.new[c("interval","steps")], !(is.na(steps)) ), "interval", colwise(sum))
+```
+
+Once the totals for each interval are calculated, a mean is found for each interval by deviding the total by the number of days. Noting that each intervals occurs only once a day. The number of days is simply the number of rows in days.Steps.new (it has one row per day).   
+
+
+```r
+# copy the data for calculation of mean
+interval.mean.Steps.new  <- interval.total.Steps.new
+# calculate mean by altering the steps column (ie total steps in the interval/ days)
+sample.days.new <- nrow(days.Steps.new)
+interval.mean.Steps.new$steps <- interval.mean.Steps.new$steps / sample.days.new
+```
+
+The data in interval.mean.Steps.new is used to make a time series plot of the 5-minute interval (x-axis) and the average number of steps taken, averaged across all days (y-axis) below:
+
+
+```r
+library(ggplot2)
+p <- ggplot(interval.mean.Steps, aes(interval, steps)) + geom_line() +
+      xlab("Interval") + ylab("Mean Steps")
+print(p)
+```
+
+![](PA1_files/figure-html/tsplotnew-1.png) 
